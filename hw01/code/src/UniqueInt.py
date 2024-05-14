@@ -3,7 +3,7 @@ class UniqueInt:
     def processFile(input_file_path, output_file_path):
         """
         Reads an input file, finds the unique integers, and writes the results to an output file.
-        
+
         Args:
             input_file_path (str): The path to the input file.
             output_file_path (str): The path to the output file.
@@ -15,87 +15,107 @@ class UniqueInt:
     def findUniqueIntegers(input_file_path):
         """
         Reads the input file and finds the unique integers.
-        
+
         Args:
             input_file_path (str): The path to the input file.
-        
+
         Returns:
             list: A list of unique integers.
         """
         unique_integers = []
-        current_size = 0
+        unique_counts = {}
         with open(input_file_path, 'r') as input_file:
-            while True:
-                integer = UniqueInt.readNextItemFromFile(input_file)
-                if integer is None:
-                    break
-                if not UniqueInt.contains(unique_integers, current_size, integer):
-                    unique_integers = UniqueInt.insert(unique_integers, current_size, integer)
-                    current_size += 1
-        return UniqueInt.sortIntegers(unique_integers)
+            for line in input_file:
+                integer = UniqueInt.readNextItemFromFile(line.strip())
+                if integer is not None:
+                    if integer not in unique_counts:
+                        UniqueInt.addUniqueInteger(unique_integers, unique_counts, integer)
+                    else:
+                        unique_counts[integer] += 1
+        UniqueInt.iterativeQuicksort(unique_integers, 0, len(unique_integers) - 1)
+        return unique_integers
 
     @staticmethod
-    def contains(lst, size, item):
+    def addUniqueInteger(unique_integers, unique_counts, integer):
+        """
+        Adds a unique integer to the list of unique integers in the correct position to maintain increasing order.
+
+        Args:
+            unique_integers (list): The list of unique integers.
+            unique_counts (dict): A dictionary to keep track of the count of each unique integer.
+            integer (int): The integer to add.
+        """
+        left, right = 0, len(unique_integers) - 1
+        while left <= right:
+            mid = (left + right) // 2
+            if unique_integers[mid] == integer:
+                return
+            elif unique_integers[mid] < integer:
+                left = mid + 1
+            else:
+                right = mid - 1
+        unique_integers.insert(left, integer)
+        unique_counts[integer] = 1
+
+    @staticmethod
+    def contains(lst, item):
         """
         Checks if an item is present in a list.
-        
+
         Args:
             lst (list): The list to search.
-            size (int): The number of elements in the list.
             item: The item to search for.
-        
+
         Returns:
             bool: True if the item is in the list, False otherwise.
         """
-        for i in range(size):
-            if lst[i] == item:
-                return True
-        return False
+        return item in lst
 
     @staticmethod
-    def insert(lst, index, item):
+    def iterativeQuicksort(lst, left, right):
         """
-        Inserts an item into a list at the specified index.
-        
+        Sorts a list of integers in increasing order using the Quicksort algorithm (iterative implementation).
+
         Args:
-            lst (list): The list to insert the item into.
-            index (int): The index at which to insert the item.
-            item: The item to insert.
-        
-        Returns:
-            list: The updated list with the item inserted.
+            lst (list): The list to sort.
+            left (int): The left index of the sublist to sort.
+            right (int): The right index of the sublist to sort.
         """
-        new_list = [None] * (len(lst) + 1)
-        for i in range(index):
-            new_list[i] = lst[i]
-        new_list[index] = item
-        for i in range(index, len(lst)):
-            new_list[i + 1] = lst[i]
-        return new_list
+        stack = [(left, right)]
+        while stack:
+            low, high = stack.pop()
+            if low < high:
+                pivot = UniqueInt.partition(lst, low, high)
+                stack.append((low, pivot - 1))
+                stack.append((pivot + 1, high))
 
     @staticmethod
-    def sortIntegers(integers):
+    def partition(lst, left, right):
         """
-        Sorts a list of integers in increasing order.
-        
+        Partitions a list around a pivot element for the Quicksort algorithm.
+
         Args:
-            integers (list): A list of integers.
-        
+            lst (list): The list to partition.
+            left (int): The left index of the sublist to partition.
+            right (int): The right index of the sublist to partition.
+
         Returns:
-            list: The sorted list of integers.
+            int: The index of the pivot element.
         """
-        n = len(integers)
-        for i in range(n):
-            for j in range(0, n - i - 1):
-                if integers[j] > integers[j + 1]:
-                    integers[j], integers[j + 1] = integers[j + 1], integers[j]
-        return integers
+        pivot = lst[right]
+        i = left - 1
+        for j in range(left, right):
+            if lst[j] < pivot:
+                i += 1
+                lst[i], lst[j] = lst[j], lst[i]
+        lst[i + 1], lst[right] = lst[right], lst[i + 1]
+        return i + 1
 
     @staticmethod
     def writeUniqueIntegers(output_file_path, unique_integers):
         """
         Writes the unique integers to the output file.
-        
+
         Args:
             output_file_path (str): The path to the output file.
             unique_integers (list): A list of unique integers.
@@ -105,24 +125,23 @@ class UniqueInt:
                 output_file.write(str(integer) + '\n')
 
     @staticmethod
-    def readNextItemFromFile(input_file_stream):
+    def readNextItemFromFile(line):
         """
-        Reads the next integer from the input file stream.
-        
+        Reads the next integer from the input file line.
+
         Args:
-            input_file_stream (file): The input file stream.
-        
+            line (str): The input file line.
+
         Returns:
-            int or None: The next integer from the file, or None if the end of the file is reached.
+            int or None: The integer value from the line,
+            or None if the line is empty or contains non-integer characters.
         """
         try:
-            line = input_file_stream.readline().strip()
-            if line:
-                return int(line)
+            return int(line)
         except ValueError:
             # Skip lines with non-integer values
-            pass
-        return None
+            return None
+
 
 # Example usage
-UniqueInt.processFile('hw01/sample_inputs/sample_01.txt', 'hw01/sample_results/sample_input_01.txt_results.txt')
+UniqueInt.processFile('hw01/sample_inputs/sample_03.txt', 'hw01/sample_results/sample_input_03.txt_results.txt')
