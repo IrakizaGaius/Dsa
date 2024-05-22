@@ -1,9 +1,3 @@
-# dsa/sparse_matrix/code/src/sparse_matrix.py
-"""
-This module provides an implementation of a Sparse Matrix data structure
-and operations such as addition, subtraction, and multiplication.
-"""
-
 class SparseMatrix:
     """
     Represents a sparse matrix, stored efficiently using a dictionary.
@@ -16,17 +10,27 @@ class SparseMatrix:
             corresponding element values.
     """
 
-    def __init__(self, matrix_file_path):
+    def __init__(self, matrix_file_path=None, rows=None, cols=None):
         """
-        Initializes a SparseMatrix object by reading the matrix from a file.
+        Initializes a SparseMatrix object. If matrix_file_path is provided, it reads the matrix from the file.
+        If rows and cols are provided, it initializes an empty matrix with given dimensions.
 
         Args:
-            matrix_file_path (str): The file path of the input matrix.
+            matrix_file_path (str): The file path of the input matrix (optional).
+            rows (int): The number of rows in the matrix (optional).
+            cols (int): The number of columns in the matrix (optional).
 
         Raises:
             ValueError: If the input file has an incorrect format.
         """
-        self.rows, self.cols, self.matrix = self.read_matrix_from_file(matrix_file_path)
+        if matrix_file_path:
+            self.rows, self.cols, self.matrix = self.read_matrix_from_file(matrix_file_path)
+        elif rows is not None and cols is not None:
+            self.rows = rows
+            self.cols = cols
+            self.matrix = {}
+        else:
+            raise ValueError("Either matrix_file_path or both rows and cols must be provided")
 
     def read_matrix_from_file(self, file_path):
         """
@@ -86,7 +90,10 @@ class SparseMatrix:
             col (int): The column index of the element.
             value (int): The new value to be set for the element.
         """
-        self.matrix[(row, col)] = value
+        if value != 0:
+            self.matrix[(row, col)] = value
+        elif (row, col) in self.matrix:
+            del self.matrix[(row, col)]
 
     def add(self, other):
         """
@@ -104,7 +111,7 @@ class SparseMatrix:
         if self.rows != other.rows or self.cols != other.cols:
             raise ValueError("Matrices must have the same dimensions for addition")
 
-        result = SparseMatrix(f"Dsa/sparse_matrix/sample_inputs/sample_results/result.txt")
+        result = SparseMatrix(rows=self.rows, cols=self.cols)
         for (row, col), value in self.matrix.items():
             result.set_element(row, col, value)
         for (row, col), value in other.matrix.items():
@@ -127,7 +134,7 @@ class SparseMatrix:
         if self.rows != other.rows or self.cols != other.cols:
             raise ValueError("Matrices must have the same dimensions for subtraction")
 
-        result = SparseMatrix(f"Dsa/sparse_matrix/sample_inputs/sample_results/result.txt")
+        result = SparseMatrix(rows=self.rows, cols=self.cols)
         for (row, col), value in self.matrix.items():
             result.set_element(row, col, value)
         for (row, col), value in other.matrix.items():
@@ -151,20 +158,35 @@ class SparseMatrix:
         if self.cols != other.rows:
             raise ValueError("The number of columns in the first matrix must be equal to the number of rows in the second matrix for multiplication")
 
-        result = SparseMatrix(f"Dsa/sparse_matrix/sample_inputs/sample_results/result.txt")
+        result = SparseMatrix(rows=self.rows, cols=other.cols)
         for i in range(self.rows):
             for j in range(other.cols):
                 value = sum(self.get_element(i, k) * other.get_element(k, j) for k in range(self.cols))
-                result.set_element(i, j, value)
+                if value != 0:
+                    result.set_element(i, j, value)
         return result
+
+    def write_matrix_to_file(self, file_path):
+        """
+        Writes the sparse matrix to a file in the specified format.
+
+        Args:
+            file_path (str): The file path where the matrix will be written.
+        """
+        with open(file_path, 'w') as file:
+            file.write(f"rows={self.rows}\n")
+            file.write(f"cols={self.cols}\n")
+            for (row, col), value in sorted(self.matrix.items()):
+                file.write(f"({row}, {col}, {value})\n")
+
 
 if __name__ == "__main__":
     """
     The main function that allows the user to select an operation and performs it
     on the input sparse matrices.
     """
-    matrix1 = SparseMatrix("Dsa/sparse_matrix/sample_inputs/easy_sample_01_1.txt")
-    matrix2 = SparseMatrix("Dsa/sparse_matrix/sample_inputs/easy_sample_01_2.txt")
+    matrix1 = SparseMatrix("sparse_matrix/sample_inputs/easy_sample_01_1.txt")
+    matrix2 = SparseMatrix("sparse_matrix/sample_inputs/easy_sample_01_2.txt")
 
     print("Select an operation:")
     print("1. Addition")
@@ -182,7 +204,6 @@ if __name__ == "__main__":
         print("Invalid choice!")
         exit()
 
-    print("Result:")
-    for row in range(result.rows):
-        for col in range(result.cols):
-            print(f"({row}, {col}, {result.get_element(row, col)})")
+    result_file_path = "sparse_matrix/sample_results/result.txt"
+    result.write_matrix_to_file(result_file_path)
+    print(f"Result written to {result_file_path}")
