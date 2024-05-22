@@ -156,7 +156,8 @@ class SparseMatrix:
                 number of rows in the second matrix.
         """
         if self.cols != other.rows:
-            raise ValueError("The number of columns in the first matrix must be equal to the number of rows in the second matrix for multiplication")
+            raise ValueError("The number of columns in the first matrix must be equal to "
+                             "the number of rows in the second matrix for multiplication")
 
         result = SparseMatrix(rows=self.rows, cols=other.cols)
         for i in range(self.rows):
