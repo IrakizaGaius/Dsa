@@ -104,7 +104,7 @@ class SparseMatrix:
         if self.rows != other.rows or self.cols != other.cols:
             raise ValueError("Matrices must have the same dimensions for addition")
 
-        result = SparseMatrix(f"dsa/sparse_matrix/sample_inputs/result.txt")
+        result = SparseMatrix(f"Dsa/sparse_matrix/sample_inputs/sample_results/result.txt")
         for (row, col), value in self.matrix.items():
             result.set_element(row, col, value)
         for (row, col), value in other.matrix.items():
@@ -127,7 +127,7 @@ class SparseMatrix:
         if self.rows != other.rows or self.cols != other.cols:
             raise ValueError("Matrices must have the same dimensions for subtraction")
 
-        result = SparseMatrix(f"dsa/sparse_matrix/sample_inputs/result.txt")
+        result = SparseMatrix(f"Dsa/sparse_matrix/sample_inputs/sample_results/result.txt")
         for (row, col), value in self.matrix.items():
             result.set_element(row, col, value)
         for (row, col), value in other.matrix.items():
@@ -151,7 +151,7 @@ class SparseMatrix:
         if self.cols != other.rows:
             raise ValueError("The number of columns in the first matrix must be equal to the number of rows in the second matrix for multiplication")
 
-        result = SparseMatrix(f"dsa/sparse_matrix/sample_inputs/result.txt")
+        result = SparseMatrix(f"Dsa/sparse_matrix/sample_inputs/sample_results/result.txt")
         for i in range(self.rows):
             for j in range(other.cols):
                 value = sum(self.get_element(i, k) * other.get_element(k, j) for k in range(self.cols))
